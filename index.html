@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>加密解密工具箱 | 悄悄话加密器</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background: #f1f5f9;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .app-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 32px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            backdrop-filter: blur(0px);
+        }
+
+        /* 选项卡样式 */
+        .tabs {
+            display: flex;
+            background: #1e293b;
+            gap: 4px;
+            padding: 0;
+        }
+
+        .tab-btn {
+            flex: 1;
+            text-align: center;
+            padding: 16px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #cbd5e1;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            letter-spacing: 1px;
+        }
+
+        .tab-btn.active {
+            color: white;
+            background: #f97316;
+            border-radius: 20px 20px 0 0;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+        }
+
+        .panel {
+            display: none;
+            padding: 24px 20px 28px;
+            animation: fade 0.25s ease;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        h2 {
+            font-size: 1.6rem;
+            margin: 0 0 12px 0;
+            color: #0f172a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        label {
+            font-weight: 600;
+            display: block;
+            margin: 18px 0 6px 0;
+            color: #334155;
+            font-size: 0.9rem;
+        }
+
+        input, textarea {
+            width: 100%;
+            padding: 14px 16px;
+            font-size: 1rem;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 24px;
+            background: #f8fafc;
+            transition: 0.2s;
+            font-family: monospace;
+        }
+
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #f97316;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(249,115,22,0.2);
+        }
+
+        button {
+            background: #f97316;
+            color: white;
+            border: none;
+            padding: 14px 18px;
+            font-size: 1.05rem;
+            font-weight: bold;
+            border-radius: 40px;
+            width: 100%;
+            margin-top: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        button:active {
+            transform: scale(0.97);
+            background: #ea580c;
+        }
+
+        .result-box {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 24px;
+            margin-top: 24px;
+            word-break: break-all;
+            font-family: monospace;
+            border-left: 5px solid #f97316;
+        }
+
+        .result-box strong {
+            font-family: system-ui;
+            color: #0f172a;
+        }
+
+        .info-card {
+            background: #fef9e8;
+            padding: 16px;
+            border-radius: 24px;
+            margin: 18px 0;
+            font-size: 0.9rem;
+            line-height: 1.45;
+            border: 1px solid #ffe6c2;
+        }
+
+        .donate-area {
+            text-align: center;
+            margin: 24px 0 8px;
+            padding-top: 12px;
+            border-top: 2px dashed #e2e8f0;
+        }
+
+        .donate-area p {
+            color: #475569;
+            font-size: 0.85rem;
+        }
+
+        .qr-img {
+            width: 140px;
+            margin: 8px auto;
+            display: block;
+            border-radius: 20px;
+            background: white;
+            padding: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        .funny {
+            font-style: italic;
+            color: #f97316;
+            font-weight: 500;
+            text-align: center;
+            margin-top: 24px;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #94a3b8;
+            padding: 16px 0 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="tabs">
+        <button class="tab-btn active" data-panel="encryptPanel">🔒 加密</button>
+        <button class="tab-btn" data-panel="decryptPanel">🔓 解密</button>
+        <button class="tab-btn" data-panel="infoPanel">📖 加密思路</button>
+    </div>
+
+    <!-- 加密面板 -->
+    <div id="encryptPanel" class="panel active">
+        <h2>✨ 加密你的悄悄话</h2>
+        <label>输入大写字母 (A-Z, 无空格)</label>
+        <input type="text" id="plainInput" placeholder="例如:LOVE" autocomplete="off">
+        <button id="encryptBtn">🔐 开始加密</button>
+        <div class="result-box">
+            <strong>📦 密文：</strong><br>
+            <span id="cipherResult">——</span><br><br>
+            <strong>🎲 摩斯密码顺序：</strong><br>
+            <span id="orderResult">——</span>
+        </div>
+        <div class="funny">✨ 加密后发给TA，让对方用“解密”功能还原 ✨</div>
+    </div>
+
+    <!-- 解密面板 -->
+    <div id="decryptPanel" class="panel">
+        <h2>🔑 解密你的密文</h2>
+        <label>密文字符串</label>
+        <input type="text" id="cipherInput" placeholder="例如: dYawdwm" autocomplete="off">
+        <label>摩斯密码顺序 (q/w/e/r 组成)</label>
+        <input type="text" id="orderInput" placeholder="例如: werwrrr" autocomplete="off">
+        <button id="decryptBtn">🔓 开始解密</button>
+        <div class="result-box">
+            <strong>🔍 解密结果：</strong><br>
+            <span id="plainResult">——</span>
+        </div>
+        <div class="funny">😆 感兴趣的可以自己解密哈哈哈！</div>
+    </div>
+
+    <!-- 加密思路面板 + 打赏区 -->
+    <div id="infoPanel" class="panel">
+        <h2>📜 五层加密魔法</h2>
+        <div class="info-card">
+            <strong>1️⃣ 凯撒偏移 -1</strong><br>
+            A→Z , B→A , C→B ... Z→Y<br><br>
+            <strong>2️⃣ 摩斯密码替换</strong><br>
+            每个字母转为摩斯电码 ( . 和 - )<br><br>
+            <strong>3️⃣ 二进制化</strong><br>
+            点 → 0 &nbsp;&nbsp; 划 → 1 &nbsp;&nbsp; 连成一串二进制<br><br>
+            <strong>4️⃣ 二进制 → 十进制</strong><br>
+            得到一个整数<br><br>
+            <strong>5️⃣ 九键字母映射 + 顺序记录</strong><br>
+            0→Y &nbsp;1→L &nbsp;2→a &nbsp;3→d &nbsp;4→g &nbsp;5→j &nbsp;6→m &nbsp;7→p &nbsp;8→t &nbsp;9→w<br>
+            同时记录每个摩斯码长度：1→q , 2→w , 3→e , 4→r
+        </div>
+        <p style="font-size:0.9rem; margin-top: 8px;">💡 解密就是逆向操作，输入密文 + 顺序串即可还原原文~</p>
+        
+        <!-- 打赏区 -->
+        <div class="donate-area">
+            <p>🥤 如果觉得有趣，可以请作者喝杯奶茶～</p>
+            <!-- 请将你的二维码图片命名为 donate.jpg 放在同一目录下 -->
+            <img class="qr-img" src="donate.jpg" alt="打赏二维码" onerror="this.style.display='none'; this.nextSibling?.style?.removeProperty('display');">
+            <p style="font-size:0.7rem; color:#64748b;">微信 随缘支持 ❤️</p>
+        </div>
+        <footer>© 你的名字 | 密码学小玩具 v1.0</footer>
+    </div>
+</div>
+
+<script>
+    // ---------- 摩斯码表 ----------
+    const morseMap = {
+        'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.',
+        'F': '..-.', 'G': '--.', 'H': '....', 'I': '..', 'J': '.---',
+        'K': '-.-', 'L': '.-..', 'M': '--', 'N': '-.', 'O': '---',
+        'P': '.--.', 'Q': '--.-', 'R': '.-.', 'S': '...', 'T': '-',
+        'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-', 'Y': '-.--', 'Z': '--..'
+    };
+    
+    // 反向摩斯表（用于解密）
+    const reverseMorse = {};
+    for (let [k, v] of Object.entries(morseMap)) reverseMorse[v] = k;
+
+    // ---------- 凯撒加密 (左移一位，A->Z) ----------
+    function caesarEncrypt(text) {
+        let res = '';
+        for (let ch of text) {
+            if (ch >= 'A' && ch <= 'Z') {
+                res += (ch === 'A') ? 'Z' : String.fromCharCode(ch.charCodeAt(0) - 1);
+            } else {
+                res += ch;
+            }
+        }
+        return res;
+    }
+
+    // ---------- 凯撒解密 (右移一位，Z->A) ----------
+    function caesarDecrypt(text) {
+        let res = '';
+        for (let ch of text) {
+            if (ch >= 'A' && ch <= 'Z') {
+                res += (ch === 'Z') ? 'A' : String.fromCharCode(ch.charCodeAt(0) + 1);
+            } else {
+                res += ch;
+            }
+        }
+        return res;
+    }
+
+    // ---------- 加密主函数 (返回 {cipher, order}) ----------
+    function encrypt(plain) {
+        // 1. 凯撒偏移
+        let step1 = caesarEncrypt(plain.toUpperCase());
+        let binaryStr = '';
+        let lengths = [];
+
+        for (let c of step1) {
+            let m = morseMap[c];
+            if (!m) continue;
+            for (let ch of m) {
+                binaryStr += (ch === '.') ? '0' : '1';
+            }
+            lengths.push(m.length);
+        }
+
+        // 2. 二进制转十进制 (BigInt 防止大数溢出)
+        let dec = 0n;
+        for (let bit of binaryStr) {
+            dec = dec * 2n + BigInt(bit);
+        }
+        let decStr = dec.toString();
+
+        // 3. 十进制数字符映射为九键字母 (规则: 0->Y,1->L,2->a,3->d...)
+        let cipher = '';
+        for (let d of decStr) {
+            if (d === '0') cipher += 'Y';
+            else if (d === '1') cipher += 'L';
+            else if (d === '2') cipher += 'a';
+            else if (d === '3') cipher += 'd';
+            else if (d === '4') cipher += 'g';
+            else if (d === '5') cipher += 'j';
+            else if (d === '6') cipher += 'm';
+            else if (d === '7') cipher += 'p';
+            else if (d === '8') cipher += 't';
+            else if (d === '9') cipher += 'w';
+        }
+
+        // 4. 生成顺序串 (长度映射: 1->q,2->w,3->e,4->r)
+        let order = '';
+        for (let len of lengths) {
+            if (len === 1) order += 'q';
+            else if (len === 2) order += 'w';
+            else if (len === 3) order += 'e';
+            else if (len === 4) order += 'r';
+        }
+        return { cipher, order };
+    }
+
+    // ---------- 解密主函数 ----------
+    function decrypt(cipher, order) {
+        // 1. 顺序串 -> 长度数组
+        let lengths = [];
+        for (let ch of order) {
+            if (ch === 'q') lengths.push(1);
+            else if (ch === 'w') lengths.push(2);
+            else if (ch === 'e') lengths.push(3);
+            else if (ch === 'r') lengths.push(4);
+            else lengths.push(0);
+        }
+        let totalBits = lengths.reduce((a,b) => a + b, 0);
+        
+        // 2. 密文字符串 -> 十进制数字符串 (逆映射)
+        let decStr = '';
+        for (let ch of cipher) {
+            if (ch === 'L') decStr += '1';
+            else if (ch === 'Y') decStr += '0';
+            else if (ch >= 'a' && ch <= 'c') decStr += '2';
+            else if (ch >= 'd' && ch <= 'f') decStr += '3';
+            else if (ch >= 'g' && ch <= 'i') decStr += '4';
+            else if (ch >= 'j' && ch <= 'l') decStr += '5';
+            else if (ch >= 'm' && ch <= 'o') decStr += '6';
+            else if (ch >= 'p' && ch <= 's') decStr += '7';
+            else if (ch >= 't' && ch <= 'v') decStr += '8';
+            else if (ch >= 'w' && ch <= 'z') decStr += '9';
+            else decStr += '?';  // 容错
+        }
+        
+        // 3. 十进制转二进制 (BigInt)
+        let dec = BigInt(decStr);
+        let binaryStr = '';
+        if (dec === 0n) binaryStr = '0';
+        else {
+            let temp = dec;
+            while (temp > 0n) {
+                binaryStr = (temp % 2n === 1n ? '1' : '0') + binaryStr;
+                temp /= 2n;
+            }
+        }
+        // 高位补零至 totalBits 长度
+        while (binaryStr.length < totalBits) binaryStr = '0' + binaryStr;
+        
+        // 4. 按长度切割 -> 摩斯码串
+        let morseStr = '';
+        let pos = 0;
+        for (let len of lengths) {
+            if (len === 0) continue;
+            let seg = binaryStr.substr(pos, len);
+            let m = '';
+            for (let bit of seg) {
+                m += (bit === '0') ? '.' : '-';
+            }
+            morseStr += m + ' ';
+            pos += len;
+        }
+        
+        // 5. 摩斯码 -> 字母
+        let step3 = '';
+        let start = 0, endIdx;
+        while ((endIdx = morseStr.indexOf(' ', start)) !== -1) {
+            let code = morseStr.substring(start, endIdx);
+            if (reverseMorse[code]) step3 += reverseMorse[code];
+            start = endIdx + 1;
+        }
+        
+        // 6. 凯撒解密
+        let plain = caesarDecrypt(step3);
+        return plain;
+    }
+
+    // ---------- UI 交互 ----------
+    document.getElementById('encryptBtn').addEventListener('click', () => {
+        let input = document.getElementById('plainInput').value.trim();
+        if (!input) {
+            alert('请输入需要加密的大写字母串');
+            return;
+        }
+        if (!/^[A-Z]+$/.test(input)) {
+            alert('只支持大写英文字母 A-Z，不含空格或数字');
+            return;
+        }
+        let { cipher, order } = encrypt(input);
+        document.getElementById('cipherResult').innerText = cipher;
+        document.getElementById('orderResult').innerText = order;
+    });
+
+    document.getElementById('decryptBtn').addEventListener('click', () => {
+        let cipher = document.getElementById('cipherInput').value.trim();
+        let order = document.getElementById('orderInput').value.trim();
+        if (!cipher || !order) {
+            alert('请填写密文和摩斯密码顺序');
+            return;
+        }
+        try {
+            let plain = decrypt(cipher, order);
+            document.getElementById('plainResult').innerText = plain;
+        } catch (err) {
+            console.error(err);
+            alert('解密失败，请检查密文和顺序是否匹配');
+        }
+    });
+
+    // 选项卡切换
+    const tabs = document.querySelectorAll('.tab-btn');
+    const panels = {
+        encryptPanel: document.getElementById('encryptPanel'),
+        decryptPanel: document.getElementById('decryptPanel'),
+        infoPanel: document.getElementById('infoPanel')
+    };
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-panel');
+            // 更新按钮样式
+            tabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            // 更新面板显示
+            Object.values(panels).forEach(panel => panel.classList.remove('active'));
+            panels[targetId].classList.add('active');
+        });
+    });
+</script>
+</body>
+</html>
